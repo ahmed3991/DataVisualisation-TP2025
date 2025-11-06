@@ -1,0 +1,67 @@
+version: 2
+
+# -----------------
+# 1. MARTS LAYER
+# -----------------
+
+models:
+
+  - name: dim_customers
+    description: The final customer dimension table for reporting.
+    
+    config:
+      materialized: table
+
+    columns:
+      - name: customer_pk
+        description: Primary key for the dimension, inherited from stg_customers.
+        tests:
+          - unique
+          - not_null
+
+      - name: company_name
+        description: The primary name used for grouping/reporting.
+
+      - name: customer_full_address
+        description: A concatenated column containing address, city, region, and country.
+        
+      - name: first_order_date
+        description: The date of this customer's very first order (a common derived attribute).
+
+  - name: fct_orders
+    description: >
+      The central fact table for orders, including key metrics and foreign keys 
+      to dimensions like 'dim_customers' and 'dim_employees'.
+    
+    config:
+      materialized: incremental
+
+    columns:
+      - name: order_pk
+        description: Primary key for the fact record.
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_pk
+        description: Foreign key to the dim_customers table.
+        tests:
+          - relationships:
+              to: ref('dim_customers') 
+              field: customer_pk
+              
+      - name: total_order_value
+        description: The calculated sum of all line items for the order (derived by joining with Order Details).
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: float
+
+      - name: order_status_flag
+        description: Status of the order (e.g., 'Shipped', 'Pending', 'Cancelled').
+        tests:
+          - accepted_values:
+              values: ['Shipped', 'Pending', 'Cancelled']
+
+      - name: shipping_delay_days
+        description: Calculated days between 'OrderDate' and 'ShippedDate'.

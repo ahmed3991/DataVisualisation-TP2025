@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw_data_dlt
+    schema: raw
+    tables:
+      - name: daily_transactions
+      - name: currency_rates
