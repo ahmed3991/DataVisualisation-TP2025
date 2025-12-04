@@ -1,0 +1,4 @@
+order_id,customer_id,employee_id,order_date,ship_city
+10248,ALFKI,5,2024-01-10,London
+10249,ANATR,3,2024-01-12,México D.F.
+10250,ANTON,4,2024-01-15,México D.F.

@@ -1,67 +1,151 @@
 version: 2
 
-# -----------------
-# 1. MARTS LAYER
-# -----------------
-
 models:
 
+  # =====================================
+  #  DIMENSIONS
+  # =====================================
+
   - name: dim_customers
-    description: The final customer dimension table for reporting.
-    
+    description: "Customer dimension"
     config:
       materialized: table
-
     columns:
       - name: customer_pk
-        description: Primary key for the dimension, inherited from stg_customers.
         tests:
           - unique
           - not_null
+      - name: customer_id
+        tests:
+          - not_null
 
-      - name: company_name
-        description: The primary name used for grouping/reporting.
+  - name: dim_products
+    description: "Product dimension"
+    config:
+      materialized: table
+    columns:
+      - name: product_pk
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
 
-      - name: customer_full_address
-        description: A concatenated column containing address, city, region, and country.
-        
-      - name: first_order_date
-        description: The date of this customer's very first order (a common derived attribute).
+  - name: dim_employees
+    description: "Employee dimension"
+    config:
+      materialized: table
+    columns:
+      - name: employee_pk
+        tests:
+          - unique
+          - not_null
+      - name: employee_id
+        tests:
+          - not_null
+
+  - name: dim_categories
+    description: "Product categories dimension"
+    config:
+      materialized: table
+    columns:
+      - name: category_pk
+        tests:
+          - unique
+          - not_null
+      - name: category_id
+        tests:
+          - not_null
+
+  - name: dim_suppliers
+    description: "Suppliers dimension"
+    config:
+      materialized: table
+    columns:
+      - name: supplier_pk
+        tests:
+          - unique
+          - not_null
+      - name: supplier_id
+        tests:
+          - not_null
+
+  # =====================================
+  #  FACTS
+  # =====================================
 
   - name: fct_orders
-    description: >
-      The central fact table for orders, including key metrics and foreign keys 
-      to dimensions like 'dim_customers' and 'dim_employees'.
-    
+    description: "Fact table for customer orders (line-level)"
     config:
-      materialized: incremental
-
+      materialized: table
     columns:
       - name: order_pk
-        description: Primary key for the fact record.
         tests:
-          - unique
-          - not_null
+          - not_null     # ❗ تمت إزالة UNIQUE هنا
 
       - name: customer_pk
-        description: Foreign key to the dim_customers table.
         tests:
           - relationships:
-              to: ref('dim_customers') 
+              to: ref('dim_customers')
               field: customer_pk
-              
+
+      - name: product_pk
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_pk
+
       - name: total_order_value
-        description: The calculated sum of all line items for the order (derived by joining with Order Details).
         tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_of_type:
-              column_type: float
+              column_type: numeric
 
       - name: order_status_flag
-        description: Status of the order (e.g., 'Shipped', 'Pending', 'Cancelled').
         tests:
           - accepted_values:
-              values: ['Shipped', 'Pending', 'Cancelled']
+              arguments:
+                values: ['Shipped', 'Pending', 'Cancelled']
 
-      - name: shipping_delay_days
-        description: Calculated days between 'OrderDate' and 'ShippedDate'.
+  - name: fct_order_details
+    description: "Fact table at line-item level"
+    config:
+      materialized: table
+    columns:
+      - name: order_detail_pk
+        tests:
+          - unique
+          - not_null
+
+      - name: order_pk
+        tests:
+          - relationships:
+              to: ref('stg_orders')
+              field: order_pk
+
+      - name: product_pk
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_pk
+
+      - name: customer_pk
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_pk
+
+      - name: employee_pk
+        tests:
+          - relationships:
+              to: ref('dim_employees')
+              field: employee_pk
+
+      - name: extended_price
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0

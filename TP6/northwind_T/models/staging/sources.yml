@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: staging_dlt      
+    schema: staging
+    tables:
+      - name: customers
+      - name: orders
+      - name: order_details
+      - name: products
+      - name: categories
+      - name: suppliers
+      - name: employees

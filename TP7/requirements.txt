@@ -1,0 +1,8 @@
+dlt[postgres]
+requests
+pandas
+dbt-core
+dbt-postgres
+dlt[parquet]
+SQLAlchemy
+prefect

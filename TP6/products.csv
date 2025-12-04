@@ -1,0 +1,6 @@
+product_id,product_name,supplier_id,category_id,unit_price,units_in_stock
+1,Chai,1,1,18,39
+2,Chang,1,1,19,17
+3,Aniseed Syrup,1,2,10,13
+4,Chef Anton's Cajun Seasoning,2,2,22,53
+5,Chef Anton's Gumbo Mix,2,2,21.35,0

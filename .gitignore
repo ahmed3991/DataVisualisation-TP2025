@@ -1,0 +1,10 @@
+# استبعاد ملفات Metabase والملفات الضخمة
+TP7/metabase.jar
+TP7/metabase.db.mv.db
+TP7/metabase.db.trace.db
+TP7/plugins/
+
+*.jar
+*.db
+*.mv.db
+*.trace.db

@@ -1,0 +1,14 @@
+northwind_T:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: example-host.supabase.com
+      user: hassan_user
+      password: "HassanSecurePassword_2025"
+      port: 6543
+      dbname: postgres
+      schema: northwind_warehouse
+      threads: 4
+      keepalives_idle: 0
+
